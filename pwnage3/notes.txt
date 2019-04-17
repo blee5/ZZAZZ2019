@@ -1,0 +1,198 @@
+# ALL NUMBERS HEX UNLESS STATED OTHERWISE
+
+##############################################################
+# Important data addresses
+##############################################################
+# Some stuff being written:
+A567 to A766 ; mapdata? (0d512 bytes)
+
+A103 - A106 | 33 07 08 1B
+(0x1B080733)
+copied into A107 - A10A
+
+##############################################################
+# A13A, DECRYPTION MAIN LOOP
+##############################################################
+ld hl, A107
+ld de, A103
+call A084 ; copies A103-A106 to A107-A10A
+ld hl, A0F4
+ld de, A10B
+
+# Some weird copying?
+# A0F3 - A0F6 | p q r s
+# A10B - A10E | q 0 r s 
+ldi a, (hl) ; read from A0F4 and increment HL
+ld (de), a ; copying A0F4...
+inc d ; to A10B
+xor a ; clear a to 0
+ld (de), a ; writes 0 to A10C
+inc de
+ldi a, (hl) ; copying A0F5..
+ld (de), a ; to A10D
+inc de
+ld a, (hl) ; copying A0F6..
+ld (de), a ; to A10E
+
+ld hl, A567 ; NOTE: A567 is the start of the data
+ld bc, 0000
+
+### Inner loop start ###
+
+# A15A
+push hl
+push bc
+call A10F ; bitwise operations with stuff at A10B
+pop bc
+pop hl
+xor (hl) ; xor A...
+ldi (hl), a ; with (hl), then move to next byte
+
+# has this thing written 512 bytes yet?
+inc bc
+ld a, b
+cp a, 02 ; stop when bc is 0200
+jr nz, A16F ; skip the next two loads
+
+# reached the end, go back
+ld bc, 0000
+ld hl, A567
+
+# A16F
+push hl
+ld hl, A107 ; (0x1B080733)
+call A0A4 ; decrement 32bit counter at A107
+pop hl
+jr nz, A15A ; continue if counter at A107 is zero
+
+### Inner loop end ###
+
+# A179
+ld hl, A0F3
+ld de, A0F7 ; A0F7 reads 25 91 E7 35
+call A0C4 ; multiply 32bit number at A0F7 by 32bit nmber at A0F3(0x35e79125)
+ld hl, A0F3
+ld de, A0FB ; A0FB reads 10 6b 59 56
+call A090 ; add 32bit number at A0FB to 32bit number at A0F3 (0x56596b10)
+
+ld lh, A0FF ; A0FF reads 09 fb ff 7f
+call A0A4 ; holy shit another counter (0x7ffffb0a)
+jr nz, A13A ; uh oh back to the beginning again
+
+ret ; returns to whatever happens after the decryption
+
+##############################################################
+# A084: copy 4 bytes from from (de) to (hl)
+##############################################################
+ld a, (de)
+ldi (hl), a
+inc de
+; repetition for the other 3 bytes omitted for brevity
+ret
+
+##############################################################
+# A0C4 - multiply 32bit number at (hl) by (de)
+##############################################################
+# only called from A17F, so de is A0F7 and hl is A0F3 here
+push hl
+
+# create copy of (de) to decrement
+push hl
+push de
+ld hl, A0B8
+call A084 ; copy 32bit number from A0F7 to A0B8
+pop de ; de back to A0F7
+pop hl ; hl back to A0F3
+
+# zero out 32bit number from A0BC to create space for scratchwork
+push hl
+ld hl, A0BC
+ld de, A0C0 ; note that A0C0 contains zeroes
+call A084 ; copy 32bit number from A0C0 to A0BC
+pop de ; last pushed was hl, so de is A0F3 now
+
+# A0DA - add 32bit number to A0F3 to A0BC repeatedly until counter at A0B8 is zero
+# (in other words, multiply the 32bit number at A0B8 by the 32bit number at A0BC
+push de
+ld hl, A0BC ; add 32bit number from A0F3
+call A090 ; ... to A0BC
+pop de ; de back to A0F3
+push de
+ld hl, A0B8
+call A0A4 ; decrement A0B8
+pop de ; de back to A0F3
+jr nz, A0DA ; is A0B8 zero? if yes, jump back to A0DA
+
+# move the multiplication result at A0BC to the original (hl) which happens to be A0F3
+pop hl ; hl is A0F3
+ld de, A0BC
+jp A084 ; copy 32bit number at A0BC to A0F3 (then return to A182)
+
+##############################################################
+# A090 - add 32bit number at (de) to (hl)
+##############################################################
+ld a, (de)
+add (hl)
+ldi (hl), a
+inc de
+ld a, (de)
+adc (hl) ; add with carry
+ldi (hl), a
+inc de
+; repetition for the other 2 bytes omitted for brevity
+ret
+
+##############################################################
+# A0A4 - decrements 4 byte counter at (hl), returns with zero flag set if zero
+##############################################################
+push hl
+ld de, A0A0 ; note that A0A0 reads FFFFFFFF
+call A090 ; basically fancier version of decrement the 32bit number at (hl)
+pop hl
+ldi a, (hl)
+and a
+ret nz
+; repetition for 2 bytes omitted for brevity
+ldi a, (hl)
+and a
+ret
+
+##############################################################
+# A10F - some bitwise stuff
+##############################################################
+ld hl, A10B
+ldi a, (hl) ; a <- A10B
+ld h, (hl) ; h <- A10C
+ld l, a ; l <- A10B
+and a ; huh?
+
+# dividing a 16bit number at (hl) by two
+srl h ; right shift h - divide the upper byte, then
+rr l ; right rotate l (through carry) - divide the lower byte, including the carry bit from srl h
+
+ld d, h ; copying hl ...
+ld e, l ; to de
+ld hl, 0000
+ld a, (A10D)
+ld c, a ; c <- A10D
+and a ; is A10D zero?
+jr z, A12A ; if yes, jump to A12A (skip the multiplication if A10D is zero)
+
+# A126 - since HL is set to 0 before, this part is
+# equivalent to DE * (A10D)
+add hl, de ; add DE to HL
+dec c ; decrement C 
+jr nz, A126 ; repeat until C is zero...
+
+# A12A:
+ld a, (A10E)
+ld c, a ; c <- (A10E)
+ld b, 00
+add hl, bc ; adding A10E to HL
+
+# A10C, A10B | L, H
+ld a, h 
+ld (A10C), a 
+ld a, l
+ld (A10B), a
+ret
