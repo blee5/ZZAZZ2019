@@ -23,7 +23,6 @@ int main()
     }
     fclose(f);
 
-    A0FF = 2;
     while (A0FF--)
     {
         printf("%02x\n", buffer[0]);

@@ -24,7 +24,7 @@ int main()
     uint32_t outer_count = 0x7ffffb0a;
     uint32_t outer_lcg = 0x5d0b1c11;
     uint16_t index = 0;
-    outer_count = 2;
+
     while (outer_count--)
     {
         printf("%02x\n", buffer[0]);
