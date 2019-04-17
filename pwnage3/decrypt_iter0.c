@@ -30,6 +30,8 @@ int main()
         uint16_t A10B = (A0F3 >> 8) & 0xff;
         uint16_t A10D = (A0F3 >> 16) & 0xff;
         uint16_t A10E = (A0F3 >> 24) & 0xff;
+
+        index = 0;
         while (A107--)
         {
             A10B = (A10B / 2) * A10D + A10E;

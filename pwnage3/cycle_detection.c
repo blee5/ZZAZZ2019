@@ -9,22 +9,22 @@
 /*
  * might be used to optimize the inner LCG maybe?
  */
-int detect_cycle_16(uint16_t a, uint16_t c, uint16_t s)
+int detect_cycle_16(uint8_t a, uint8_t c, uint16_t s)
 {
-    uint16_t tortoise = s * a + c;
-    uint16_t hare = (s * a + c) * a + c;
+    uint16_t tortoise = s / 2 * a + c;
+    uint16_t hare = (s / 2 * a + c) / 2 * a + c;
     while (tortoise != hare)
     {
-        tortoise = tortoise * a + c;
-        hare = (hare * a + c) * a + c;
+        tortoise = tortoise / 2 * a + c;
+        hare = (hare / 2 * a + c) / 2 * a + c;
     }
 
     uint32_t period = 1;
-    tortoise = s * a + c;
+    tortoise = s / 2 * a + c;
     while (tortoise != hare)
     {
         period++;
-        tortoise = tortoise * a + c;
+        tortoise = tortoise / 2 * a + c;
     }
     return period;
 }
