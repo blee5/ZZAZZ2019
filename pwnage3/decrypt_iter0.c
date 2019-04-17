@@ -23,8 +23,10 @@ int main()
     }
     fclose(f);
 
+    A0FF = 2;
     while (A0FF--)
     {
+        printf("%02x\n", buffer[0]);
         A107 = A103;
         uint16_t A10B = (A0F3 >> 8) & 0xff;
         uint16_t A10D = (A0F3 >> 16) & 0xff;
@@ -36,13 +38,11 @@ int main()
             index %= 0x200;
         }
         A0F3 = A0F3 * 0x35e79125 + 0x56596b10;
-        printf("%08x\n", A0FF);
+        // printf("%08x\n", A0FF);
     }
     for (index = 0; index < 512; index++)
     {
         printf("%02x ", buffer[index]);
-        if (index % 0xf == 0)
-            putchar('\n');
     }
     putchar('\n');
 }
