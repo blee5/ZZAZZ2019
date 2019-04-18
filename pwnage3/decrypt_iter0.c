@@ -15,7 +15,12 @@ int main()
     unsigned char buffer[512];
     uint16_t index = 0;
 
-    FILE *f = fopen("encrypted.hex", "rb");
+    FILE *f = fopen("encrypted.bin", "rb");
+    if (!f)
+    {
+        perror("Could not find file");
+        exit(-1);
+    }
     if (fread(buffer, 1, 512, f) != 512)
     {
         perror("Couldn't read map data");
@@ -25,7 +30,6 @@ int main()
 
     while (A0FF--)
     {
-        printf("%02x\n", buffer[0]);
         A107 = A103;
         uint16_t A10B = (A0F3 >> 8) & 0xff;
         uint16_t A10D = (A0F3 >> 16) & 0xff;
@@ -39,11 +43,11 @@ int main()
             index %= 0x200;
         }
         A0F3 = A0F3 * 0x35e79125 + 0x56596b10;
-        // printf("%08x\n", A0FF);
+        printf("%08x\n", A0FF);
     }
     for (index = 0; index < 512; index++)
     {
-        printf("%02x ", buffer[index]);
+        printf("%02x", buffer[index]);
     }
     putchar('\n');
 }
