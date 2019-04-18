@@ -15,4 +15,7 @@ My solution was to find [where the current map ID was stored](https://github.com
 and to freeze that address into another value as the map was first being loaded. The map ID of the hidden map wasn't given, but the first thing I tried (adding 1 to the first map's ID) worked, so yay?
 
 ## Pwnage Kingdom 3
+Will write later
+
+## Pwnage Kingdom 4
 WIP

@@ -47,11 +47,11 @@ int main()
      * So we don't have to do anything except advance the LCG,
      * since we didn't do anything for the previous period either.
      */
-	/* outer_count -= outer_period; */
-	/* while (outer_count--) */
-	/* { */
-		/* outer_lcg = outer_lcg * 0x35e79125 + 0x56596b10; */
-	/* } */
+    outer_count -= outer_period;
+    while (outer_count--)
+    {
+        outer_lcg = outer_lcg * 0x35e79125 + 0x56596b10;
+    }
 
     /*
      * Run the iterations that actually have an effect
