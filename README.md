@@ -15,7 +15,12 @@ My solution was to find [where the current map ID was stored](https://github.com
 and to freeze that address into another value as the map was first being loaded. The map ID of the hidden map wasn't given, but the first thing I tried (adding 1 to the first map's ID) worked, so yay?
 
 ## Pwnage Kingdom 3
-Will write later
+tl;dr
+- Find the decryption routine
+- Translate into C
+- Recognize (with the help of other people) that this is an implementation of a [linear congruential generator](https://en.wikipedia.org/wiki/Linear_congruential_generator)
+- Find the period of the outer LCG, where the numbers start repeating
+- Recognize that the XORs from the first period will cancel out the XORs from the next period, which significantly reduces the number of iterations needed
 
 ## Pwnage Kingdom 4
-WIP
+lol no
